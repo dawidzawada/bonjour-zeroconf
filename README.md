@@ -1,9 +1,8 @@
 # @dawidzawada/bonjour-zeroconf
 
-TODO description
+Zeroconf devices scanner using Bonjour (iOS) and NSD (Android) for React Native & Expo apps. Powered by Nitro Modules.
 
 ## Installation
-
 
 ```sh
 npm install @dawidzawada/bonjour-zeroconf react-native-nitro-modules
@@ -11,18 +10,15 @@ npm install @dawidzawada/bonjour-zeroconf react-native-nitro-modules
 > `react-native-nitro-modules` is required as this library relies on [Nitro Modules](https://nitro.margelo.com/).
 ```
 
-
 ## Usage
 
-
 ```js
-import { multiply } from '@dawidzawada/bonjour-zeroconf';
+import { Scanner } from '@dawidzawada/bonjour-zeroconf';
 
 // ...
 
-const result = multiply(3, 7);
+Scanner.scan('_bonjour._tcp', 'local');
 ```
-
 
 ## Contributing
 

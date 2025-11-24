@@ -4,13 +4,16 @@
     "iosModuleName": "BonjourZeroconf"
   },
   "android": {
-    "androidNamespace": ["dawidzawada","bonjourzeroconf"],
+    "androidNamespace": ["dawidzawada", "bonjourzeroconf"],
     "androidCxxLibName": "dawidzawada_bonjourzeroconf"
   },
   "autolinking": {
     "BonjourZeroconf": {
       "swift": "BonjourZeroconf",
       "kotlin": "BonjourZeroconf"
+    },
+    "LocalNetworkPermission": {
+      "swift": "LocalNetworkPermission"
     }
   },
   "ignorePaths": ["node_modules"]

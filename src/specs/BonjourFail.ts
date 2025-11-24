@@ -1,0 +1,5 @@
+export enum BonjourFail {
+  RESOLVE_FAILED,
+  EXTRACTION_FAILED,
+  DISCOVERY_FAILED,
+}
