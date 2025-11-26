@@ -45,8 +45,24 @@
   },
   "keywords": [
     "react-native",
+    "bonjour",
+    "zeroconf",
+    "mdns",
+    "nsd",
+    "service-discovery",
+    "network-discovery",
+    "local-network",
+    "nitro-modules",
     "ios",
-    "android"
+    "android",
+    "expo",
+    "typescript",
+    "swift",
+    "kotlin",
+    "device-discovery",
+    "multicast-dns",
+    "dns-sd",
+    "avahi"
   ],
   "repository": {
     "type": "git",
