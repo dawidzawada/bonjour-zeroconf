@@ -1,3 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/banner-dark.png" />
+  <source media="(prefers-color-scheme: light)" srcset="./docs/banner-light.png" />
+  <img alt="BonjourZeroconf" src="./docs/banner-light.png" />
+</picture>
+
 # Bonjour Zeroconf 🇫🇷🥖
 
 ⚡ **High-performance Zeroconf/mDNS service discovery for React Native**
