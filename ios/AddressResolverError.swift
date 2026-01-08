@@ -6,15 +6,18 @@
 //
 
 enum AddressResolverError: Error {
-    case timeout
-    case extractionFailed
-    
-    var localizedDescription: String {
-      switch self {
-      case .timeout:
-        return "Connection timed out"
-      case .extractionFailed:
-        return "Failed to extract IP and port information"
-      }
+  case timeout
+  case extractionFailed
+  case cancelled
+  
+  var localizedDescription: String {
+    switch self {
+    case .timeout:
+      return "Connection timed out"
+    case .extractionFailed:
+      return "Failed to extract IP and port information"
+    case .cancelled:
+      return "Cancelled resolve process"
     }
+  }
 }

@@ -11,6 +11,7 @@ import com.margelo.nitro.NitroModules
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 
@@ -33,6 +34,7 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
   internal var currentDiscoveryListener: NsdManager.DiscoveryListener? = null
   internal val serviceCache = ConcurrentHashMap<String, ScanResult>()
   internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+  internal val resolveScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   internal val legacyResolveMutex = Mutex()
 
   override val isScanning: Boolean
@@ -69,6 +71,8 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
   }
 
   override fun stop() {
+    resolveScope.coroutineContext.cancelChildren()
+
     currentDiscoveryListener?.let { listener ->
       try {
         nsdManager?.stopServiceDiscovery(listener)
@@ -142,7 +146,7 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
         return
       }
 
-      scope.launch {
+      resolveScope.launch {
         try {
           resolveService(service, serviceKey, resolveTimeout)
         } catch (e: Exception) {

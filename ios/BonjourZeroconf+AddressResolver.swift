@@ -9,25 +9,41 @@ import Network
 extension BonjourZeroconf {
   /// Resolve a service to get its IP address and port using async/await
   internal func resolveService(result: NWBrowser.Result, name: String, timeout: TimeInterval) async -> ScanResult? {
+      let taskId = UUID()
+      
       do {
           return try await withCheckedThrowingContinuation { continuation in
               let connection = NWConnection(to: result.endpoint, using: .tcp)
               
-              final class ResumeBox {
-                  var hasResumed = false
+              resolveLock.lock()
+              guard _isScanning else {
+                  resolveLock.unlock()
+                  continuation.resume(throwing: AddressResolverError.cancelled)
+                  return
               }
+              activeConnections[taskId] = connection
+              resolveLock.unlock()
+              
+              final class ResumeBox { var hasResumed = false }
               let box = ResumeBox()
               
-              let timeoutTask = DispatchWorkItem {
+              let timeoutTask = DispatchWorkItem { [weak self] in
+                  guard let self = self else { return }
                   guard !box.hasResumed else { return }
                   box.hasResumed = true
                   Loggy.log(.debug, message: "Timeout resolving \(name)")
                   continuation.resume(throwing: AddressResolverError.timeout)
-                  connection.cancel()
+                  self.cleanupResolve(connection: connection, taskId: taskId)
               }
+              
+              resolveLock.lock()
+              activeTimeouts[taskId] = timeoutTask
+              resolveLock.unlock()
+              
               networkQueue.asyncAfter(deadline: .now() + timeout, execute: timeoutTask)
               
               connection.stateUpdateHandler = { [weak self] state in
+                  guard let self = self else { return }
                   switch state {
                   case .ready:
                       timeoutTask.cancel()
@@ -35,12 +51,12 @@ extension BonjourZeroconf {
                       box.hasResumed = true
                       
                       if let remoteEndpoint = connection.currentPath?.remoteEndpoint,
-                         let scanResult = self?.extractIPAndPort(from: remoteEndpoint, serviceName: name) {
+                         let scanResult = self.extractIPAndPort(from: remoteEndpoint, serviceName: name) {
                           continuation.resume(returning: scanResult)
                       } else {
                           continuation.resume(throwing: AddressResolverError.extractionFailed)
                       }
-                      connection.cancel()
+                      self.cleanupResolve(connection: connection, taskId: taskId)
                       
                   case .failed(let error):
                       timeoutTask.cancel()
@@ -48,7 +64,7 @@ extension BonjourZeroconf {
                       box.hasResumed = true
                       Loggy.log(.error, message: "Failed to resolve service \(name): \(error.localizedDescription)")
                       continuation.resume(throwing: error)
-                      connection.cancel()
+                      self.cleanupResolve(connection: connection, taskId: taskId)
                       
                   case .waiting(let error):
                       Loggy.log(.debug, message: "Connection waiting for \(name): \(error.localizedDescription)")
@@ -61,25 +77,46 @@ extension BonjourZeroconf {
                   }
               }
               
-            connection.start(queue: networkQueue)
+              connection.start(queue: networkQueue)
           }
       } catch let error as AddressResolverError {
-        switch error {
-        case .timeout:
-            notifyScanFailListeners(with: BonjourFail.resolveFailed)
-          break;
-        case .extractionFailed:
-            notifyScanFailListeners(with: BonjourFail.extractionFailed)
-          break;
-        }
-        return nil
-    } catch {
-        return nil
-    }
+          switch error {
+          case .timeout:
+              notifyScanFailListeners(with: BonjourFail.resolveFailed)
+          case .extractionFailed:
+              notifyScanFailListeners(with: BonjourFail.extractionFailed)
+          case .cancelled:
+              Loggy.log(.debug, message: "Scanning stopped, cancelling address resolution")
+              break
+          }
+          return nil
+      } catch {
+          return nil
+      }
+  }
+  
+  /// Cancels ongoing address resolve process
+  internal func cancelAddressResolving() {
+      Loggy.log(.debug, message: "Cancelling Address Resolving")
+      resolveLock.lock()
+      activeTimeouts.values.forEach { $0.cancel() }
+      activeTimeouts.removeAll()
+      activeConnections.values.forEach { $0.cancel() }
+      activeConnections.removeAll()
+      resolveLock.unlock()
+  }
+
+  /// Cleans up after single resolve process
+  private func cleanupResolve(connection: NWConnection, taskId: UUID) {
+      connection.cancel()
+      resolveLock.lock()
+      activeConnections.removeValue(forKey: taskId)
+      activeTimeouts.removeValue(forKey: taskId)
+      resolveLock.unlock()
   }
   
   /// Extract IP address and port from an endpoint
-  internal func extractIPAndPort(from endpoint: NWEndpoint, serviceName: String) -> ScanResult? {
+  private func extractIPAndPort(from endpoint: NWEndpoint, serviceName: String) -> ScanResult? {
       switch endpoint {
       case .hostPort(let host, let port):
           var ipv4: String?

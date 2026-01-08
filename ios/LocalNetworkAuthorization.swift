@@ -49,7 +49,6 @@ public class LocalNetworkAuthorization: NSObject {
     }
     
     private func reset() {
-        print("resetting")
         self.browser?.cancel()
         self.browser = nil
         self.netService?.stop()

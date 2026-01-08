@@ -13,6 +13,10 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
   internal var scanFailListeners: [UUID: (BonjourFail) -> Void] = [:]
   internal let networkQueue = DispatchQueue(label: "com.bonjour-zeroconf.network", qos: .userInitiated)
   
+  internal var activeConnections: [UUID: NWConnection] = [:]
+  internal var activeTimeouts: [UUID: DispatchWorkItem] = [:]
+  internal let resolveLock = NSLock()
+  
   var isScanning: Bool {
     return _isScanning
   }
@@ -111,6 +115,8 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
       if let browser = self._browser {
           browser.cancel()
       }
+    
+      cancelAddressResolving()
       
       self._isScanning = false
       Task {

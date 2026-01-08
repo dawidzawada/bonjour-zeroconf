@@ -11,6 +11,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.Executors
 
 suspend fun BonjourZeroconf.resolveService(service: NsdServiceInfo, serviceKey: String, timeout: Long) {
+  if (!_isScanning) return
+
   if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
     // New API (Android 14+)
     resolveServiceNew(service, serviceKey, timeout)
@@ -52,6 +54,12 @@ suspend fun BonjourZeroconf.resolveServiceNew(service: NsdServiceInfo, serviceKe
           override fun onServiceUpdated(serviceInfo: NsdServiceInfo) {
             Log.d(TAG, "Service updated: ${serviceInfo.serviceName}")
             unregisterCallback()
+
+            if (!_isScanning) {
+              continuation.resume(null) {}
+              return
+            }
+
             continuation.resume(serviceInfo) {}
           }
 
@@ -114,6 +122,12 @@ suspend fun BonjourZeroconf.resolveServiceLegacy(service: NsdServiceInfo, servic
 
             override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
               Log.d(TAG, "Service resolved: ${serviceInfo.serviceName}")
+
+              if (!_isScanning) {
+                continuation.resume(null) {}
+                return
+              }
+
               continuation.resume(serviceInfo) {}
             }
           }
