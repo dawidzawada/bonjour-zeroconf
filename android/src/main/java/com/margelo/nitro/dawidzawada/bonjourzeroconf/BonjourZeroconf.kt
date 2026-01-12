@@ -8,6 +8,7 @@ import com.facebook.proguard.annotations.DoNotStrip
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.core.Promise
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -67,6 +68,25 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
         updateScanningState(false)
         throw RuntimeException("Failed to start service discovery: ${e.message}", e)
       }
+    }
+  }
+
+  override fun scanFor(
+    time: Double,
+    type: String,
+    domain: String,
+    options: ScanOptions?
+  ): Promise<Array<ScanResult>> {
+    return Promise.async {
+      scan(type, domain, options)
+
+      kotlinx.coroutines.delay((time * 1000).toLong())
+
+      val results = serviceCache.values.toTypedArray()
+
+      stop()
+
+      results
     }
   }
 

@@ -150,6 +150,30 @@ Scanner.scan('_printer._tcp', 'local', {
 - `_airplay._tcp` – AirPlay devices
 - `_printer._tcp` – Network printers
 
+#### `scanFor(time: number, type: string, domain: string, options?: ScanOptions)`
+
+Scan for services for a specified duration and return results as a Promise.
+
+```ts
+const devices = await Scanner.scanFor(15, '_http._tcp', 'local');
+console.log('Found devices:', devices);
+```
+
+```ts
+const devices = await Scanner.scanFor(25, '_printer._tcp', 'local', {
+  addressResolveTimeout: 10000, // ms
+});
+```
+
+**Parameters:**
+
+- `time` – Duration in seconds to scan before stopping
+- `type` – Service type to discover
+- `domain` – Domain to scan (typically `'local'`)
+- `options` – Optional scan configuration
+
+**Returns:** `Promise<ScanResult[]>` – Array of discovered services
+
 #### `stop()`
 
 Stop scanning and clear cached results.

@@ -12,6 +12,7 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
   internal var scanStateListeners: [UUID: (Bool) -> Void] = [:]
   internal var scanFailListeners: [UUID: (BonjourFail) -> Void] = [:]
   internal let networkQueue = DispatchQueue(label: "com.bonjour-zeroconf.network", qos: .userInitiated)
+  internal let timeoutScanQueue = DispatchQueue(label: "com.bonjour-zeroconf.scan", qos: .userInitiated)
   
   internal var activeConnections: [UUID: NWConnection] = [:]
   internal var activeTimeouts: [UUID: DispatchWorkItem] = [:]
@@ -74,6 +75,20 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
     
       Loggy.log(.info, message: "Starting browser for service type: \(type)")
       browser.start(queue: networkQueue)
+  }
+  
+  func scanFor(time: Double, type: String, domain: String, options: ScanOptions?) throws -> Promise<[ScanResult]> {
+    return Promise.async {
+      self.scan(type: type, domain: domain, options: options)
+      
+      try await Task.sleep(nanoseconds: UInt64(time * 1_000_000_000))
+      
+      let results = await self.serviceCache.getAll()
+      
+      self.stop()
+      
+      return results
+    }
   }
   
   func listenForScanResults(onResult: @escaping ([ScanResult]) -> Void) -> BonjourListener {
