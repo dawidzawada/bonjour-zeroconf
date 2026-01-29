@@ -276,6 +276,14 @@ enum BonjourFail {
 }
 ```
 
+## Nitro compatibility table
+
+| Bonjour version 🥖 | Recommended Nitro Version |
+| ------------------ | ------------------------- |
+| 1.2.X              | 0.32.X                    |
+| 1.1.X              | 0.31.X                    |
+| 1.0.X              | 0.31.X                    |
+
 ## Contributing
 
 - [Development workflow](CONTRIBUTING.md#development-workflow)
