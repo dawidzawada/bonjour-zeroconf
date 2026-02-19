@@ -8,6 +8,8 @@ import com.margelo.nitro.dawidzawada.bonjourzeroconf.BonjourZeroconf.Companion.l
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import java.net.Inet6Address
+import java.net.NetworkInterface
 import java.util.concurrent.Executors
 
 suspend fun BonjourZeroconf.resolveService(service: NsdServiceInfo, serviceKey: String, timeout: Long) {
@@ -168,7 +170,7 @@ private fun BonjourZeroconf.extractScanResult(serviceInfo: NsdServiceInfo): Scan
 
     val (ipv4, ipv6) = when {
       host.address.size == 4 -> host.hostAddress to null
-      host.address.size == 16 -> null to formatIPv6Address(host.address)
+      host.address.size == 16 -> null to formatIPv6Address(host.address, host as? Inet6Address)
       else -> null to null
     }
 
@@ -186,11 +188,21 @@ private fun BonjourZeroconf.extractScanResult(serviceInfo: NsdServiceInfo): Scan
   }
 }
 
-private fun formatIPv6Address(bytes: ByteArray): String {
+private fun formatIPv6Address(bytes: ByteArray, inet6Address: Inet6Address? = null): String {
   require(bytes.size == 16) { "IPv6 address must be 16 bytes" }
 
-  return (0 until 16 step 2).joinToString(":") { i ->
+  val formatted = (0 until 16 step 2).joinToString(":") { i ->
     val segment = ((bytes[i].toInt() and 0xFF) shl 8) or (bytes[i + 1].toInt() and 0xFF)
     segment.toString(16)
   }
+
+  if (formatted.startsWith("fe80:") && inet6Address != null) {
+    val interfaceName = inet6Address.scopedInterface?.name
+      ?: NetworkInterface.getByIndex(inet6Address.scopeId)?.name
+    if (interfaceName != null) {
+      return "$formatted%$interfaceName"
+    }
+  }
+
+  return formatted
 }
