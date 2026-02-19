@@ -3,7 +3,6 @@ package com.margelo.nitro.dawidzawada.bonjourzeroconf
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
-import android.util.Log
 import com.facebook.proguard.annotations.DoNotStrip
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -20,9 +19,12 @@ import kotlinx.coroutines.sync.Mutex
 class BonjourZeroconf : HybridBonjourZeroconfSpec() {
 
   companion object {
-    internal const val TAG = "BonjourZeroconf"
     internal const val DEFAULT_RESOLVE_TIMEOUT_MS = 10_000L
+    internal val legacyResolveMutex = Mutex()
+    internal val loggy = Loggy(BonjourZeroconf::class)
   }
+
+  override var id: String? = null
 
   @Volatile
   internal var _isScanning = false
@@ -36,7 +38,6 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
   internal val serviceCache = ConcurrentHashMap<String, ScanResult>()
   internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   internal val resolveScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-  internal val legacyResolveMutex = Mutex()
 
   override val isScanning: Boolean
     get() = _isScanning
@@ -59,12 +60,12 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
 
     currentDiscoveryListener = createDiscoveryListener(resolveTimeout).also { listener ->
       try {
-        Log.i(TAG, "Starting scan for type: $type")
+        loggy.i("Starting scan for type: $type", id)
         updateScanningState(true)
         nsdManager?.discoverServices(type, NsdManager.PROTOCOL_DNS_SD, listener)
           ?: throw IllegalStateException("NsdManager is not initialized")
       } catch (e: Exception) {
-        Log.e(TAG, "Failed to start discovery", e)
+        loggy.e("Failed to start discovery", id, e)
         updateScanningState(false)
         throw RuntimeException("Failed to start service discovery: ${e.message}", e)
       }
@@ -96,9 +97,9 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
     currentDiscoveryListener?.let { listener ->
       try {
         nsdManager?.stopServiceDiscovery(listener)
-        Log.i(TAG, "Stopped service discovery")
+        loggy.i("Stopped service discovery", id)
       } catch (e: Exception) {
-        Log.e(TAG, "Error stopping discovery", e)
+        loggy.e("Error stopping discovery", id, e)
       }
     }
 
@@ -116,7 +117,7 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
         try {
           onResult(currentResults)
         } catch (e: Exception) {
-          Log.e(TAG, "Scan results listener error", e)
+          loggy.e("Scan results listener error", throwable = e)
         }
       }
     }
@@ -134,7 +135,7 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
       try {
         onChange(_isScanning)
       } catch (e: Exception) {
-        Log.e(TAG, "Scan state listener error", e)
+        loggy.e("Scan state listener error", throwable = e)
       }
     }
 
@@ -155,12 +156,12 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
   private fun createDiscoveryListener(resolveTimeout: Long) = object : NsdManager.DiscoveryListener {
 
     override fun onDiscoveryStarted(serviceType: String) {
-      Log.d(TAG, "Discovery started: $serviceType")
+      loggy.d("Discovery started: $serviceType", id)
     }
 
     override fun onServiceFound(service: NsdServiceInfo) {
       val serviceKey = createServiceKey(service)
-      Log.d(TAG, "Service found: ${service.serviceName} (key: $serviceKey)")
+      loggy.d("Service found: ${service.serviceName} (key: $serviceKey)", id)
 
       if (serviceCache.containsKey(serviceKey)) {
         return
@@ -170,14 +171,14 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
         try {
           resolveService(service, serviceKey, resolveTimeout)
         } catch (e: Exception) {
-          Log.e(TAG, "Error resolving service: $serviceKey", e)
+          loggy.e("Error resolving service: $serviceKey", id, e)
         }
       }
     }
 
     override fun onServiceLost(service: NsdServiceInfo) {
       val serviceKey = createServiceKey(service)
-      Log.d(TAG, "Service lost: ${service.serviceName} (key: $serviceKey)")
+      loggy.d("Service lost: ${service.serviceName} (key: $serviceKey)", id)
 
       serviceCache.remove(serviceKey)?.let {
         notifyScanResultsListeners()
@@ -185,19 +186,19 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
     }
 
     override fun onDiscoveryStopped(serviceType: String) {
-      Log.d(TAG, "Discovery stopped: $serviceType")
+      loggy.d("Discovery stopped: $serviceType", id)
       updateScanningState(false)
     }
 
     override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
-      Log.e(TAG, "Start discovery failed: $serviceType, error: $errorCode")
+      loggy.e("Start discovery failed: $serviceType, error: $errorCode", id)
       notifyScanFailListeners(BonjourFail.DISCOVERY_FAILED)
       updateScanningState(false)
     }
 
     override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) {
       notifyScanFailListeners(BonjourFail.DISCOVERY_FAILED)
-      Log.e(TAG, "Stop discovery failed: $serviceType, error: $errorCode")
+      loggy.e("Stop discovery failed: $serviceType, error: $errorCode", id)
     }
   }
 
@@ -205,3 +206,4 @@ class BonjourZeroconf : HybridBonjourZeroconfSpec() {
     return "${service.serviceName}.${service.serviceType}"
   }
 }
+

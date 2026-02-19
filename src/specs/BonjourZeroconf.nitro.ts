@@ -9,6 +9,7 @@ export interface ScanOptions {
 
 export interface BonjourZeroconf
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+  id?: string;
   readonly isScanning: boolean;
 
   scan(type: string, domain: string, options?: ScanOptions): void;

@@ -11,6 +11,7 @@ import NitroModules
 /// See ``HybridBonjourZeroconfSpec``
 public protocol HybridBonjourZeroconfSpec_protocol: HybridObject {
   // Properties
+  var id: String? { get set }
   var isScanning: Bool { get }
 
   // Methods

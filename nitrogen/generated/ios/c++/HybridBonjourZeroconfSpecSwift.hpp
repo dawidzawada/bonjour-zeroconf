@@ -22,8 +22,8 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf { struct BonjourListener; 
 namespace margelo::nitro::dawidzawada_bonjourzeroconf { enum class BonjourFail; }
 
 #include <string>
-#include "ScanOptions.hpp"
 #include <optional>
+#include "ScanOptions.hpp"
 #include "ScanResult.hpp"
 #include <vector>
 #include <NitroModules/Promise.hpp>
@@ -77,6 +77,13 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
 
   public:
     // Properties
+    inline std::optional<std::string> getId() noexcept override {
+      auto __result = _swiftPart.getId();
+      return __result;
+    }
+    inline void setId(const std::optional<std::string>& id) noexcept override {
+      _swiftPart.setId(id);
+    }
     inline bool getIsScanning() noexcept override {
       return _swiftPart.isScanning();
     }

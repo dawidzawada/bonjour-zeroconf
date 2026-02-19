@@ -16,13 +16,13 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf { struct ScanOptions; }
 // Forward declaration of `BonjourFail` to properly resolve imports.
 namespace margelo::nitro::dawidzawada_bonjourzeroconf { enum class BonjourFail; }
 
+#include <string>
+#include <optional>
 #include "ScanResult.hpp"
 #include <vector>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JScanResult.hpp"
-#include <string>
-#include <optional>
 #include "BonjourListener.hpp"
 #include "JBonjourListener.hpp"
 #include <functional>
@@ -72,6 +72,15 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
   }
 
   // Properties
+  std::optional<std::string> JHybridBonjourZeroconfSpec::getId() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getId");
+    auto __result = method(_javaPart);
+    return __result != nullptr ? std::make_optional(__result->toStdString()) : std::nullopt;
+  }
+  void JHybridBonjourZeroconfSpec::setId(const std::optional<std::string>& id) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* id */)>("setId");
+    method(_javaPart, id.has_value() ? jni::make_jstring(id.value()) : nullptr);
+  }
   bool JHybridBonjourZeroconfSpec::getIsScanning() {
     static const auto method = javaClassStatic()->getMethod<jboolean()>("isScanning");
     auto __result = method(_javaPart);

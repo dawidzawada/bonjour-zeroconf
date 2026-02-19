@@ -45,6 +45,12 @@ abstract class HybridBonjourZeroconfSpec: HybridObject() {
   // Properties
   @get:DoNotStrip
   @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var id: String?
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val isScanning: Boolean
 
   // Methods

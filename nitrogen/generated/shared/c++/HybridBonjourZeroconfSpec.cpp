@@ -14,6 +14,8 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
     HybridObject::loadHybridMethods();
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
+      prototype.registerHybridGetter("id", &HybridBonjourZeroconfSpec::getId);
+      prototype.registerHybridSetter("id", &HybridBonjourZeroconfSpec::setId);
       prototype.registerHybridGetter("isScanning", &HybridBonjourZeroconfSpec::getIsScanning);
       prototype.registerHybridMethod("scan", &HybridBonjourZeroconfSpec::scan);
       prototype.registerHybridMethod("scanFor", &HybridBonjourZeroconfSpec::scanFor);

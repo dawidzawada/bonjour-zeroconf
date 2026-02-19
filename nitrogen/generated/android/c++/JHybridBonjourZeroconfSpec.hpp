@@ -51,6 +51,8 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
 
   public:
     // Properties
+    std::optional<std::string> getId() override;
+    void setId(const std::optional<std::string>& id) override;
     bool getIsScanning() override;
 
   public:

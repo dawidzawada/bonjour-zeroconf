@@ -1,5 +1,3 @@
-import { NitroModules } from 'react-native-nitro-modules';
-import type { BonjourZeroconf } from './specs/BonjourZeroconf.nitro';
 import { useIsScanning } from './useIsScanning';
 import { type ScanResult } from './specs/ScanResult';
 import { type ScanOptions } from './specs/BonjourZeroconf.nitro';
@@ -8,15 +6,17 @@ import {
   requestLocalNetworkPermission,
   useLocalNetworkPermission,
 } from './permissions';
+import { BonjourScanner, type BonjourScannerOptions } from './BonjourScanner';
 
-export const Scanner =
-  NitroModules.createHybridObject<BonjourZeroconf>('BonjourZeroconf');
+export const Scanner = new BonjourScanner();
 
 export {
+  BonjourScanner,
   useIsScanning,
   requestLocalNetworkPermission,
   useLocalNetworkPermission,
   BonjourFail,
+  type BonjourScannerOptions,
   type ScanResult,
   type ScanOptions,
 };

@@ -1,7 +1,6 @@
 package com.margelo.nitro.dawidzawada.bonjourzeroconf
 
-import android.util.Log
-import com.margelo.nitro.dawidzawada.bonjourzeroconf.BonjourZeroconf.Companion.TAG
+import com.margelo.nitro.dawidzawada.bonjourzeroconf.BonjourZeroconf.Companion.loggy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -12,7 +11,7 @@ fun BonjourZeroconf.notifyScanResultsListeners() {
       try {
         listener(results)
       } catch (e: Exception) {
-        Log.e(TAG, "Error notifying scan results listener", e)
+        loggy.e("Error notifying scan results listener", id, e)
       }
     }
   }
@@ -25,7 +24,7 @@ fun BonjourZeroconf.updateScanningState(newState: Boolean) {
       try {
         listener(newState)
       } catch (e: Exception) {
-        Log.e(TAG, "Error notifying scan state listener", e)
+        loggy.e("Error notifying scan state listener", id, e)
       }
     }
   }
@@ -38,7 +37,7 @@ fun BonjourZeroconf.notifyScanFailListeners(fail: BonjourFail) {
       try {
         listener(fail)
       } catch (e: Exception) {
-        Log.e(TAG, "Error notifying scan fail listener", e)
+        loggy.e("Error notifying scan fail listener", id, e)
       }
     }
   }

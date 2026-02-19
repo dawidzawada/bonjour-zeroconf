@@ -23,8 +23,8 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf { struct BonjourListener; 
 namespace margelo::nitro::dawidzawada_bonjourzeroconf { enum class BonjourFail; }
 
 #include <string>
-#include "ScanOptions.hpp"
 #include <optional>
+#include "ScanOptions.hpp"
 #include "ScanResult.hpp"
 #include <vector>
 #include <NitroModules/Promise.hpp>
@@ -59,6 +59,8 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
 
     public:
       // Properties
+      virtual std::optional<std::string> getId() = 0;
+      virtual void setId(const std::optional<std::string>& id) = 0;
       virtual bool getIsScanning() = 0;
 
     public:

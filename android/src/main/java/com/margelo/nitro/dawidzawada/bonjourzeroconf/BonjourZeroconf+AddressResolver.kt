@@ -2,9 +2,9 @@ package com.margelo.nitro.dawidzawada.bonjourzeroconf
 
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
-import android.util.Log
 import androidx.annotation.RequiresApi
-import com.margelo.nitro.dawidzawada.bonjourzeroconf.BonjourZeroconf.Companion.TAG
+import com.margelo.nitro.dawidzawada.bonjourzeroconf.BonjourZeroconf.Companion.legacyResolveMutex
+import com.margelo.nitro.dawidzawada.bonjourzeroconf.BonjourZeroconf.Companion.loggy
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
@@ -40,19 +40,19 @@ suspend fun BonjourZeroconf.resolveServiceNew(service: NsdServiceInfo, serviceKe
             try {
               manager.unregisterServiceInfoCallback(this)
             } catch (e: Exception) {
-              Log.e(TAG, "Error unregistering", e)
+              loggy.e("Error unregistering", id, e)
             }
           }
 
           override fun onServiceInfoCallbackRegistrationFailed(errorCode: Int) {
-            Log.e(TAG, "Registration failed: ${service.serviceName}, error: $errorCode")
+            loggy.e("Registration failed: ${service.serviceName}, error: $errorCode", id)
             notifyScanFailListeners(BonjourFail.RESOLVE_FAILED)
             unregisterCallback()
             continuation.resume(null) {}
           }
 
           override fun onServiceUpdated(serviceInfo: NsdServiceInfo) {
-            Log.d(TAG, "Service updated: ${serviceInfo.serviceName}")
+            loggy.d("Service updated: ${serviceInfo.serviceName}", id)
             unregisterCallback()
 
             if (!_isScanning) {
@@ -64,11 +64,11 @@ suspend fun BonjourZeroconf.resolveServiceNew(service: NsdServiceInfo, serviceKe
           }
 
           override fun onServiceLost() {
-            Log.d(TAG, "Service lost during resolution: ${service.serviceName}")
+            loggy.d("Service lost during resolution: ${service.serviceName}", id)
           }
 
           override fun onServiceInfoCallbackUnregistered() {
-            Log.d(TAG, "Callback unregistered: ${service.serviceName}")
+            loggy.d("Callback unregistered: ${service.serviceName}", id)
             executor.shutdown()
           }
         }
@@ -80,13 +80,13 @@ suspend fun BonjourZeroconf.resolveServiceNew(service: NsdServiceInfo, serviceKe
             try {
               manager.unregisterServiceInfoCallback(callback)
             } catch (e: Exception) {
-              Log.e(TAG, "Error unregistering on cancellation", e)
+              loggy.e("Error unregistering on cancellation", id, e)
               executor.shutdown()
             }
           }
         } catch (e: Exception) {
           notifyScanFailListeners(BonjourFail.RESOLVE_FAILED)
-          Log.e(TAG, "Exception registering callback", e)
+          loggy.e("Exception registering callback", id, e)
           executor.shutdown()
           continuation.resume(null) {}
         }
@@ -98,11 +98,11 @@ suspend fun BonjourZeroconf.resolveServiceNew(service: NsdServiceInfo, serviceKe
         serviceCache[serviceKey] = scanResult
         notifyScanResultsListeners()
       }
-    } ?: Log.w(TAG, "Failed to resolve service: $serviceKey")
+    } ?: loggy.w("Failed to resolve service: $serviceKey", id)
 
   } catch (e: Exception) {
     notifyScanFailListeners(BonjourFail.RESOLVE_FAILED)
-    Log.e(TAG, "Error during service resolution", e)
+    loggy.e("Error during service resolution", id, e)
   }
 }
 
@@ -114,14 +114,14 @@ suspend fun BonjourZeroconf.resolveServiceLegacy(service: NsdServiceInfo, servic
         suspendCancellableCoroutine { continuation ->
           val resolveListener = object : NsdManager.ResolveListener {
             override fun onResolveFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
-              Log.e(TAG, "Resolve failed: ${serviceInfo.serviceName}, error: $errorCode")
+              loggy.e("Resolve failed: ${serviceInfo.serviceName}, error: $errorCode", id)
 
               notifyScanFailListeners(BonjourFail.RESOLVE_FAILED)
               continuation.resume(null) {}
             }
 
             override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
-              Log.d(TAG, "Service resolved: ${serviceInfo.serviceName}")
+              loggy.d("Service resolved: ${serviceInfo.serviceName}", id)
 
               if (!_isScanning) {
                 continuation.resume(null) {}
@@ -142,7 +142,7 @@ suspend fun BonjourZeroconf.resolveServiceLegacy(service: NsdServiceInfo, servic
             manager.resolveService(service, resolveListener)
           } catch (e: Exception) {
             notifyScanFailListeners(BonjourFail.RESOLVE_FAILED)
-            Log.e(TAG, "Exception resolving service", e)
+            loggy.e("Exception resolving service", id, e)
             continuation.resume(null) {}
           }
         }
@@ -154,10 +154,10 @@ suspend fun BonjourZeroconf.resolveServiceLegacy(service: NsdServiceInfo, servic
         serviceCache[serviceKey] = scanResult
         notifyScanResultsListeners()
       }
-    } ?: Log.w(TAG, "Failed to resolve service: $serviceKey")
+    } ?: loggy.w("Failed to resolve service: $serviceKey", id)
 
   } catch (e: Exception) {
-    Log.e(TAG, "Error during service resolution", e)
+    loggy.e("Error during service resolution", id, e)
   }
 }
 
@@ -181,7 +181,7 @@ private fun BonjourZeroconf.extractScanResult(serviceInfo: NsdServiceInfo): Scan
     )
   } catch (e: Exception) {
     notifyScanFailListeners(BonjourFail.EXTRACTION_FAILED)
-    Log.e(TAG, "Failed to extract scan result", e)
+    loggy.e("Failed to extract scan result", id, e)
     null
   }
 }
