@@ -7,20 +7,14 @@
 
 extension BonjourZeroconf {
   internal func notifyScanResultsListeners(with results: [ScanResult]) {
-    for listener in scanResultsListeners.values {
-      listener(results)
-    }
+    Task { await listenerStore.notifyScanResults(with: results) }
   }
-  
+
   internal func notifyScanStateListeners(with isScanningState: Bool) {
-    for listener in scanStateListeners.values {
-      listener(isScanningState)
-    }
+    Task { await listenerStore.notifyScanState(with: isScanningState) }
   }
-  
+
   internal func notifyScanFailListeners(with fail: BonjourFail) {
-    for listener in scanFailListeners.values {
-      listener(fail)
-    }
+    Task { await listenerStore.notifyScanFail(with: fail) }
   }
 }

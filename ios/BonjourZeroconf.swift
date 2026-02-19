@@ -10,9 +10,7 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
 
   private let DEFAULT_RESOLVE_TIMEOUT = 10.0
 
-  internal var scanResultsListeners: [UUID: ([ScanResult]) -> Void] = [:]
-  internal var scanStateListeners: [UUID: (Bool) -> Void] = [:]
-  internal var scanFailListeners: [UUID: (BonjourFail) -> Void] = [:]
+  internal let listenerStore = ListenerStore()
   internal let networkQueue = DispatchQueue(label: "com.bonjour-zeroconf.network", qos: .userInitiated)
   internal let timeoutScanQueue = DispatchQueue(label: "com.bonjour-zeroconf.scan", qos: .userInitiated)
 
@@ -58,7 +56,6 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
 
           case .cancelled:
               Loggy.log(.info, id: self.id, message: "Browser cancelled")
-              self._isScanning = false
 
           default:
               break
@@ -95,35 +92,31 @@ class BonjourZeroconf: HybridBonjourZeroconfSpec {
 
   func listenForScanResults(onResult: @escaping ([ScanResult]) -> Void) -> BonjourListener {
     let listenerId = UUID()
-    self.scanResultsListeners[listenerId] = onResult
-
     Task {
-        let cachedResults = await serviceCache.getAll()
-        onResult(cachedResults)
+      await listenerStore.addScanResults(listenerId, onResult)
+      let cachedResults = await serviceCache.getAll()
+      onResult(cachedResults)
     }
-
     return BonjourListener { [weak self] in
-      self?.scanResultsListeners.removeValue(forKey: listenerId)
+      Task { await self?.listenerStore.remove(listenerId) }
     }
   }
 
   func listenForScanState(onChange: @escaping (Bool) -> Void) -> BonjourListener {
     let listenerId = UUID()
-    self.scanStateListeners[listenerId] = onChange
-
-    onChange(_isScanning)
-
+    let currentState = _isScanning
+    Task { await listenerStore.addScanState(listenerId, onChange) }
+    onChange(currentState)
     return BonjourListener { [weak self] in
-      self?.scanStateListeners.removeValue(forKey: listenerId)
+      Task { await self?.listenerStore.remove(listenerId) }
     }
   }
 
   func listenForScanFail(onFail: @escaping (BonjourFail) -> Void) -> BonjourListener {
     let listenerId = UUID()
-    self.scanFailListeners[listenerId] = onFail
-
+    Task { await listenerStore.addScanFail(listenerId, onFail) }
     return BonjourListener { [weak self] in
-      self?.scanFailListeners.removeValue(forKey: listenerId)
+      Task { await self?.listenerStore.remove(listenerId) }
     }
   }
 
