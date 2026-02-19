@@ -11,7 +11,10 @@ export const requestLocalNetworkPermission = async () => {
   return await LocalNetworkPermission.requestPermission();
 };
 
-export const useLocalNetworkPermission = () => {
+export const useLocalNetworkPermission = (): [
+  boolean,
+  () => Promise<boolean>,
+] => {
   const [permissionGranted, setPermissionGranted] = useState(false);
 
   useEffect(() => {
