@@ -17,6 +17,7 @@ Discover devices and services on your local network using native Bonjour (iOS) a
 - 📡 **Cross-platform** – iOS (Bonjour) and Android (NSD)
 - 📱 **Managing iOS permissions** - no need for extra libraries or custom code, just use `requestLocalNetworkPermission` or `useLocalNetworkPermission` before scanning!
 - 🔄 **Real-time updates** – listen to scan results, state changes, and errors
+- 🔭 **Multiple scanners** – run several independent scanners simultaneously for different service types
 - 🧩 **Expo compatible** - (config plugin coming soon)
 
 ## 📦 Installation
@@ -125,9 +126,32 @@ function App() {
 
 ---
 
+## 🔭 Multiple Scanners
+
+For convenience, the library exports a `Scanner` singleton that covers most use cases. Each scanner can only scan one service type at a time, so if you need to discover multiple service types simultaneously, use the `BonjourScanner` class to create as many independent scanners as you need.
+
+```tsx
+import { BonjourScanner } from '@dawidzawada/bonjour-zeroconf';
+
+const printerScanner = new BonjourScanner({ id: 'printers' });
+const httpScanner = new BonjourScanner({ id: 'http' });
+
+// Both run in parallel, scanning different service types
+printerScanner.scan('_printer._tcp', 'local');
+httpScanner.scan('_http._tcp', 'local');
+```
+
+The optional `id` is appended to log messages, making it easy to distinguish between scanners during debugging.
+
+---
+
 ## 📖 API Reference
 
 ### **Scanner**
+
+A pre-created `BonjourScanner` singleton exported for convenience. Use it when you only need to scan one service type at a time.
+
+### **BonjourScanner**
 
 #### `scan(type: string, domain: string, options?: ScanOptions)`
 
