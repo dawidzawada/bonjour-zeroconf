@@ -1,5 +1,5 @@
 PODS:
-  - BonjourZeroconf (1.1.0):
+  - BonjourZeroconf (1.2.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2546,7 +2546,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  BonjourZeroconf: 828ce563d8869abc7f224da9f9cf1cacc80b7a85
+  BonjourZeroconf: 608054cd7cd5d98d75f529fb4e488793ea1523c7
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
@@ -2623,4 +2623,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: d8b6ea91e3aeb896fdd926a8bd046c59d29f5966
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
