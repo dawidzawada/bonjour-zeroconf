@@ -5,7 +5,6 @@
 /// Copyright © Marc Rousavy @ Margelo
 ///
 
-import Foundation
 import NitroModules
 
 /// See ``HybridLocalNetworkPermissionSpec``
@@ -31,14 +30,14 @@ open class HybridLocalNetworkPermissionSpec_base {
   public init() { }
   public func getCxxWrapper() -> HybridLocalNetworkPermissionSpec_cxx {
   #if DEBUG
-    guard self is HybridLocalNetworkPermissionSpec else {
+    guard self is any HybridLocalNetworkPermissionSpec else {
       fatalError("`self` is not a `HybridLocalNetworkPermissionSpec`! Did you accidentally inherit from `HybridLocalNetworkPermissionSpec_base` instead of `HybridLocalNetworkPermissionSpec`?")
     }
   #endif
     if let cxxWrapper = self.cxxWrapper {
       return cxxWrapper
     } else {
-      let cxxWrapper = HybridLocalNetworkPermissionSpec_cxx(self as! HybridLocalNetworkPermissionSpec)
+      let cxxWrapper = HybridLocalNetworkPermissionSpec_cxx(self as! any HybridLocalNetworkPermissionSpec)
       self.cxxWrapper = cxxWrapper
       return cxxWrapper
     }

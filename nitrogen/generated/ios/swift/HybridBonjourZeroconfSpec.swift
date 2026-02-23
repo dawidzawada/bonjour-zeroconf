@@ -5,7 +5,6 @@
 /// Copyright © Marc Rousavy @ Margelo
 ///
 
-import Foundation
 import NitroModules
 
 /// See ``HybridBonjourZeroconfSpec``
@@ -36,14 +35,14 @@ open class HybridBonjourZeroconfSpec_base {
   public init() { }
   public func getCxxWrapper() -> HybridBonjourZeroconfSpec_cxx {
   #if DEBUG
-    guard self is HybridBonjourZeroconfSpec else {
+    guard self is any HybridBonjourZeroconfSpec else {
       fatalError("`self` is not a `HybridBonjourZeroconfSpec`! Did you accidentally inherit from `HybridBonjourZeroconfSpec_base` instead of `HybridBonjourZeroconfSpec`?")
     }
   #endif
     if let cxxWrapper = self.cxxWrapper {
       return cxxWrapper
     } else {
-      let cxxWrapper = HybridBonjourZeroconfSpec_cxx(self as! HybridBonjourZeroconfSpec)
+      let cxxWrapper = HybridBonjourZeroconfSpec_cxx(self as! any HybridBonjourZeroconfSpec)
       self.cxxWrapper = cxxWrapper
       return cxxWrapper
     }
