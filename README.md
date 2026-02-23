@@ -305,6 +305,8 @@ enum BonjourFail {
 
 | Bonjour version 🥖 | Recommended Nitro Version |
 | ------------------ | ------------------------- |
+| 2.1.X              | 0.33.X                    |
+| 2.0.X              | 0.32.X                    |
 | 1.2.X              | 0.32.X                    |
 | 1.1.X              | 0.31.X                    |
 | 1.0.X              | 0.31.X                    |
