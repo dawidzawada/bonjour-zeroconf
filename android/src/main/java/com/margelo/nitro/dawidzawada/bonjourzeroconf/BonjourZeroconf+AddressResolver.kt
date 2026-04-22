@@ -50,12 +50,14 @@ suspend fun BonjourZeroconf.resolveServiceNew(service: NsdServiceInfo, serviceKe
             loggy.e("Registration failed: ${service.serviceName}, error: $errorCode", id)
             notifyScanFailListeners(BonjourFail.RESOLVE_FAILED)
             unregisterCallback()
-            continuation.resume(null) {}
+            if (continuation.isActive) continuation.resume(null) {}
           }
 
           override fun onServiceUpdated(serviceInfo: NsdServiceInfo) {
             loggy.d("Service updated: ${serviceInfo.serviceName}", id)
             unregisterCallback()
+
+            if (!continuation.isActive) return
 
             if (!_isScanning) {
               continuation.resume(null) {}
