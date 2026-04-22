@@ -9,6 +9,7 @@ import Network
 
 class LocalNetworkPermission: HybridLocalNetworkPermissionSpec {
   internal var permissionListeners: [UUID: (Bool) -> Void] = [:]
+  private var pendingAuthorization: LocalNetworkAuthorization?
   
   func requestPermission() throws -> Promise<Bool> {
     return Promise.async {
@@ -28,12 +29,14 @@ class LocalNetworkPermission: HybridLocalNetworkPermissionSpec {
       self?.permissionListeners.removeValue(forKey: listenerId)
     }
   }
-  
+
   private func requestAuthorizationAsync() async throws -> Bool {
     return await withCheckedContinuation { continuation in
       let authorizationInstance = LocalNetworkAuthorization()
-      authorizationInstance.requestAuthorization { granted in
-        self.notifyPermissionListeners(with: granted)
+      self.pendingAuthorization = authorizationInstance
+      authorizationInstance.requestAuthorization { [weak self] granted in
+        self?.notifyPermissionListeners(with: granted)
+        self?.pendingAuthorization = nil
         continuation.resume(returning: granted)
       }
     }
