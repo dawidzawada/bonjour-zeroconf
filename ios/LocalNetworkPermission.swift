@@ -9,12 +9,10 @@ import Network
 
 class LocalNetworkPermission: HybridLocalNetworkPermissionSpec {
   internal var permissionListeners: [UUID: (Bool) -> Void] = [:]
-  private var pendingAuthorization: LocalNetworkAuthorization?
-  
   func requestPermission() throws -> Promise<Bool> {
     return Promise.async {
       if #available(iOS 14.0, *) {
-        return try await self.requestAuthorizationAsync()
+        return await self.requestAuthorizationAsync()
       } else {
         return true
       }
@@ -30,15 +28,11 @@ class LocalNetworkPermission: HybridLocalNetworkPermissionSpec {
     }
   }
 
-  private func requestAuthorizationAsync() async throws -> Bool {
-    return await withCheckedContinuation { continuation in
-      let authorizationInstance = LocalNetworkAuthorization()
-      self.pendingAuthorization = authorizationInstance
-      authorizationInstance.requestAuthorization { [weak self] granted in
-        self?.notifyPermissionListeners(with: granted)
-        self?.pendingAuthorization = nil
-        continuation.resume(returning: granted)
-      }
-    }
+  @MainActor
+  private func requestAuthorizationAsync() async -> Bool {
+    let auth = LocalNetworkAuthorization()
+    let granted = await auth.requestAuthorization()
+    notifyPermissionListeners(with: granted)
+    return granted
   }
 }

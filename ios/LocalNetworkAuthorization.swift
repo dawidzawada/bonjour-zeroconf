@@ -9,57 +9,70 @@ import Network
 
 // This code is based on https://stackoverflow.com/a/67758105/2618437
 // And: https://github.com/neurio/react-native-local-network-permission
+// https://gist.github.com/doozMen/0b5fc54c765bccb7c13792caa4eaa51c
+@MainActor
 public class LocalNetworkAuthorization: NSObject {
     private var browser: NWBrowser?
     private var netService: NetService?
     private var completion: ((Bool) -> Void)?
-    
-    public func requestAuthorization(completion: @escaping (Bool) -> Void) {
+
+    deinit {
+        netService?.delegate = nil
+        netService?.stop()
+        browser?.cancel()
+    }
+
+    public func requestAuthorization() async -> Bool {
+        await withCheckedContinuation { continuation in
+            start { continuation.resume(returning: $0) }
+        }
+    }
+
+    private func start(completion: @escaping (Bool) -> Void) {
         self.completion = completion
-        
-        // Create parameters, and allow browsing over peer-to-peer link.
+
         let parameters = NWParameters()
         parameters.includePeerToPeer = true
-        
-        // Browse for a custom service type.
+
         let browser = NWBrowser(for: .bonjour(type: "_bonjour._tcp", domain: nil), using: parameters)
         self.browser = browser
-        browser.stateUpdateHandler = { newState in
-            switch newState {
-            case .failed(let error):
-                print(error.localizedDescription)
-            case .ready, .cancelled:
-                break
-            case let .waiting(error):
-                Loggy.log(.warning, message: "Local network permission has been denied: \(error)")
-                self.reset()
-                self.completion?(false)
-            default:
-                break
-            }
+        browser.stateUpdateHandler = { [weak self] newState in
+            guard case let .waiting(error) = newState else { return }
+            guard let self else { return }
+            Loggy.log(.warning, message: "Local network permission has been denied: \(error)")
+            Task { @MainActor [self] in self.finish(granted: false) }
         }
-        
-        self.netService = NetService(domain: "local.", type:"_lnp._tcp.", name: "LocalNetworkPrivacy", port: 1100)
-        self.netService?.delegate = self
-        
-        self.browser?.start(queue: .main)
-        self.netService?.publish()
-        // the netService needs to be scheduled on a run loop, in this case the main runloop
-        self.netService?.schedule(in: .main, forMode: .common)
+
+        netService = NetService(domain: "local.", type: "_lnp._tcp.", name: "LocalNetworkPrivacy", port: 1100)
+        netService?.schedule(in: .main, forMode: .common)
+        netService?.delegate = self
+        browser.start(queue: .main)
+        netService?.publish()
     }
-    
+
+    private func finish(granted: Bool) {
+        let cb = completion
+        reset()
+        cb?(granted)
+    }
+
     private func reset() {
-        self.browser?.cancel()
-        self.browser = nil
-        self.netService?.stop()
-        self.netService = nil
+        browser?.cancel()
+        browser = nil
+        netService?.delegate = nil
+        netService?.stop()
+        netService = nil
+        completion = nil
     }
 }
 
-extension LocalNetworkAuthorization : NetServiceDelegate {
+// @preconcurrency suppresses the Swift 6 isolation warning:
+// netService is scheduled on main run loop
+// so MainActor isolation is guaranteed at runtime even though the ObjC protocol
+// doesn't express it statically.
+extension LocalNetworkAuthorization: @preconcurrency NetServiceDelegate {
     public func netServiceDidPublish(_ sender: NetService) {
-        self.reset()
         Loggy.log(.info, message: "Local Network permission granted")
-        completion?(true)
+        finish(granted: true)
     }
 }
