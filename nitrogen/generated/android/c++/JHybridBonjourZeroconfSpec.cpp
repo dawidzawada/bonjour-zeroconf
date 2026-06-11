@@ -38,77 +38,71 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf { enum class BonjourFail; 
 
 namespace margelo::nitro::dawidzawada_bonjourzeroconf {
 
-  jni::local_ref<JHybridBonjourZeroconfSpec::jhybriddata> JHybridBonjourZeroconfSpec::initHybrid(jni::alias_ref<jhybridobject> jThis) {
+  std::shared_ptr<JHybridBonjourZeroconfSpec> JHybridBonjourZeroconfSpec::JavaPart::getJHybridBonjourZeroconfSpec() {
+    auto hybridObject = JHybridObject::JavaPart::getJHybridObject();
+    auto castHybridObject = std::dynamic_pointer_cast<JHybridBonjourZeroconfSpec>(hybridObject);
+    if (castHybridObject == nullptr) [[unlikely]] {
+      throw std::runtime_error("Failed to downcast JHybridObject to JHybridBonjourZeroconfSpec!");
+    }
+    return castHybridObject;
+  }
+
+  jni::local_ref<JHybridBonjourZeroconfSpec::CxxPart::jhybriddata> JHybridBonjourZeroconfSpec::CxxPart::initHybrid(jni::alias_ref<jhybridobject> jThis) {
     return makeCxxInstance(jThis);
   }
 
-  void JHybridBonjourZeroconfSpec::registerNatives() {
-    registerHybrid({
-      makeNativeMethod("initHybrid", JHybridBonjourZeroconfSpec::initHybrid),
-    });
-  }
-
-  size_t JHybridBonjourZeroconfSpec::getExternalMemorySize() noexcept {
-    static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
-    return method(_javaPart);
-  }
-
-  bool JHybridBonjourZeroconfSpec::equals(const std::shared_ptr<HybridObject>& other) {
-    if (auto otherCast = std::dynamic_pointer_cast<JHybridBonjourZeroconfSpec>(other)) {
-      return _javaPart == otherCast->_javaPart;
+  std::shared_ptr<JHybridObject> JHybridBonjourZeroconfSpec::CxxPart::createHybridObject(const jni::local_ref<JHybridObject::JavaPart>& javaPart) {
+    auto castJavaPart = jni::dynamic_ref_cast<JHybridBonjourZeroconfSpec::JavaPart>(javaPart);
+    if (castJavaPart == nullptr) [[unlikely]] {
+      throw std::runtime_error("Failed to cast JHybridObject::JavaPart to JHybridBonjourZeroconfSpec::JavaPart!");
     }
-    return false;
+    return std::make_shared<JHybridBonjourZeroconfSpec>(castJavaPart);
   }
 
-  void JHybridBonjourZeroconfSpec::dispose() noexcept {
-    static const auto method = javaClassStatic()->getMethod<void()>("dispose");
-    method(_javaPart);
-  }
-
-  std::string JHybridBonjourZeroconfSpec::toString() {
-    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
-    auto javaString = method(_javaPart);
-    return javaString->toStdString();
+  void JHybridBonjourZeroconfSpec::CxxPart::registerNatives() {
+    registerHybrid({
+      makeNativeMethod("initHybrid", JHybridBonjourZeroconfSpec::CxxPart::initHybrid),
+    });
   }
 
   // Properties
   std::optional<std::string> JHybridBonjourZeroconfSpec::getId() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getId");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getId");
     auto __result = method(_javaPart);
     return __result != nullptr ? std::make_optional(__result->toStdString()) : std::nullopt;
   }
   void JHybridBonjourZeroconfSpec::setId(const std::optional<std::string>& id) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* id */)>("setId");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* id */)>("setId");
     method(_javaPart, id.has_value() ? jni::make_jstring(id.value()) : nullptr);
   }
   bool JHybridBonjourZeroconfSpec::getIsScanning() {
-    static const auto method = javaClassStatic()->getMethod<jboolean()>("isScanning");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isScanning");
     auto __result = method(_javaPart);
     return static_cast<bool>(__result);
   }
 
   // Methods
   void JHybridBonjourZeroconfSpec::scan(const std::string& type, const std::string& domain, const std::optional<ScanOptions>& options) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* type */, jni::alias_ref<jni::JString> /* domain */, jni::alias_ref<JScanOptions> /* options */)>("scan");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* type */, jni::alias_ref<jni::JString> /* domain */, jni::alias_ref<JScanOptions> /* options */)>("scan");
     method(_javaPart, jni::make_jstring(type), jni::make_jstring(domain), options.has_value() ? JScanOptions::fromCpp(options.value()) : nullptr);
   }
   std::shared_ptr<Promise<std::vector<ScanResult>>> JHybridBonjourZeroconfSpec::scanFor(double time, const std::string& type, const std::string& domain, const std::optional<ScanOptions>& options) {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(double /* time */, jni::alias_ref<jni::JString> /* type */, jni::alias_ref<jni::JString> /* domain */, jni::alias_ref<JScanOptions> /* options */)>("scanFor");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(double /* time */, jni::alias_ref<jni::JString> /* type */, jni::alias_ref<jni::JString> /* domain */, jni::alias_ref<JScanOptions> /* options */)>("scanFor");
     auto __result = method(_javaPart, time, jni::make_jstring(type), jni::make_jstring(domain), options.has_value() ? JScanOptions::fromCpp(options.value()) : nullptr);
     return [&]() {
       auto __promise = Promise<std::vector<ScanResult>>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<jni::JArrayClass<JScanResult>>(__boxedResult);
-        __promise->resolve([&]() {
-          size_t __size = __result->size();
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
           std::vector<ScanResult> __vector;
           __vector.reserve(__size);
           for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = __result->getElement(__i);
+            auto __element = __input->getElement(__i);
             __vector.push_back(__element->toCpp());
           }
           return __vector;
-        }());
+        }(__result));
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);
@@ -118,21 +112,21 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
     }();
   }
   void JHybridBonjourZeroconfSpec::stop() {
-    static const auto method = javaClassStatic()->getMethod<void()>("stop");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("stop");
     method(_javaPart);
   }
   BonjourListener JHybridBonjourZeroconfSpec::listenForScanResults(const std::function<void(const std::vector<ScanResult>& /* results */)>& onResult) {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JBonjourListener>(jni::alias_ref<JFunc_void_std__vector_ScanResult_::javaobject> /* onResult */)>("listenForScanResults_cxx");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JBonjourListener>(jni::alias_ref<JFunc_void_std__vector_ScanResult_::javaobject> /* onResult */)>("listenForScanResults_cxx");
     auto __result = method(_javaPart, JFunc_void_std__vector_ScanResult__cxx::fromCpp(onResult));
     return __result->toCpp();
   }
   BonjourListener JHybridBonjourZeroconfSpec::listenForScanState(const std::function<void(bool /* isScanning */)>& onChange) {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JBonjourListener>(jni::alias_ref<JFunc_void_bool::javaobject> /* onChange */)>("listenForScanState_cxx");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JBonjourListener>(jni::alias_ref<JFunc_void_bool::javaobject> /* onChange */)>("listenForScanState_cxx");
     auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(onChange));
     return __result->toCpp();
   }
   BonjourListener JHybridBonjourZeroconfSpec::listenForScanFail(const std::function<void(BonjourFail /* fail */)>& onFail) {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JBonjourListener>(jni::alias_ref<JFunc_void_BonjourFail::javaobject> /* onFail */)>("listenForScanFail_cxx");
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JBonjourListener>(jni::alias_ref<JFunc_void_BonjourFail::javaobject> /* onFail */)>("listenForScanFail_cxx");
     auto __result = method(_javaPart, JFunc_void_BonjourFail_cxx::fromCpp(onFail));
     return __result->toCpp();
   }

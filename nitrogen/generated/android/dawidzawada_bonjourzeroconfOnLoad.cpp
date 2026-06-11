@@ -25,28 +25,38 @@
 namespace margelo::nitro::dawidzawada_bonjourzeroconf {
 
 int initialize(JavaVM* vm) {
+  return facebook::jni::initialize(vm, []() {
+    ::margelo::nitro::dawidzawada_bonjourzeroconf::registerAllNatives();
+  });
+}
+
+struct JHybridBonjourZeroconfSpecImpl: public jni::JavaClass<JHybridBonjourZeroconfSpecImpl, JHybridBonjourZeroconfSpec::JavaPart> {
+  static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/BonjourZeroconf;";
+  static std::shared_ptr<JHybridBonjourZeroconfSpec> create() {
+    static const auto constructorFn = javaClassStatic()->getConstructor<JHybridBonjourZeroconfSpecImpl::javaobject()>();
+    jni::local_ref<JHybridBonjourZeroconfSpec::JavaPart> javaPart = javaClassStatic()->newObject(constructorFn);
+    return javaPart->getJHybridBonjourZeroconfSpec();
+  }
+};
+
+void registerAllNatives() {
   using namespace margelo::nitro;
   using namespace margelo::nitro::dawidzawada_bonjourzeroconf;
-  using namespace facebook;
 
-  return facebook::jni::initialize(vm, [] {
-    // Register native JNI methods
-    margelo::nitro::dawidzawada_bonjourzeroconf::JHybridBonjourZeroconfSpec::registerNatives();
-    margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_cxx::registerNatives();
-    margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_std__vector_ScanResult__cxx::registerNatives();
-    margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_bool_cxx::registerNatives();
-    margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_BonjourFail_cxx::registerNatives();
+  // Register native JNI methods
+  margelo::nitro::dawidzawada_bonjourzeroconf::JHybridBonjourZeroconfSpec::CxxPart::registerNatives();
+  margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_cxx::registerNatives();
+  margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_std__vector_ScanResult__cxx::registerNatives();
+  margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_bool_cxx::registerNatives();
+  margelo::nitro::dawidzawada_bonjourzeroconf::JFunc_void_BonjourFail_cxx::registerNatives();
 
-    // Register Nitro Hybrid Objects
-    HybridObjectRegistry::registerHybridObjectConstructor(
-      "BonjourZeroconf",
-      []() -> std::shared_ptr<HybridObject> {
-        static DefaultConstructableObject<JHybridBonjourZeroconfSpec::javaobject> object("com/margelo/nitro/dawidzawada/bonjourzeroconf/BonjourZeroconf");
-        auto instance = object.create();
-        return instance->cthis()->shared();
-      }
-    );
-  });
+  // Register Nitro Hybrid Objects
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "BonjourZeroconf",
+    []() -> std::shared_ptr<HybridObject> {
+      return JHybridBonjourZeroconfSpecImpl::create();
+    }
+  );
 }
 
 } // namespace margelo::nitro::dawidzawada_bonjourzeroconf

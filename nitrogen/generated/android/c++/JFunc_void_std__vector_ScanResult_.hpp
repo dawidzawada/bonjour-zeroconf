@@ -28,7 +28,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
    */
   struct JFunc_void_std__vector_ScanResult_: public jni::JavaClass<JFunc_void_std__vector_ScanResult_> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_std__vector_ScanResult_;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_std__vector_ScanResult_;";
 
   public:
     /**
@@ -36,16 +36,16 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
      */
     void invoke(const std::vector<ScanResult>& results) const {
       static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<JScanResult>> /* results */)>("invoke");
-      method(self(), [&]() {
-        size_t __size = results.size();
+      method(self(), [&](auto&& __input) {
+        size_t __size = __input.size();
         jni::local_ref<jni::JArrayClass<JScanResult>> __array = jni::JArrayClass<JScanResult>::newArray(__size);
         for (size_t __i = 0; __i < __size; __i++) {
-          const auto& __element = results[__i];
+          const auto& __element = __input[__i];
           auto __elementJni = JScanResult::fromCpp(__element);
           __array->setElement(__i, *__elementJni);
         }
         return __array;
-      }());
+      }(results));
     }
   };
 
@@ -63,16 +63,16 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
      * Invokes the C++ `std::function<...>` this `JFunc_void_std__vector_ScanResult__cxx` instance holds.
      */
     void invoke_cxx(jni::alias_ref<jni::JArrayClass<JScanResult>> results) {
-      _func([&]() {
-              size_t __size = results->size();
-              std::vector<ScanResult> __vector;
-              __vector.reserve(__size);
-              for (size_t __i = 0; __i < __size; __i++) {
-                auto __element = results->getElement(__i);
-                __vector.push_back(__element->toCpp());
-              }
-              return __vector;
-            }());
+      _func([&](auto&& __input) {
+        size_t __size = __input->size();
+        std::vector<ScanResult> __vector;
+        __vector.reserve(__size);
+        for (size_t __i = 0; __i < __size; __i++) {
+          auto __element = __input->getElement(__i);
+          __vector.push_back(__element->toCpp());
+        }
+        return __vector;
+      }(results));
     }
 
   public:
@@ -82,7 +82,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_std__vector_ScanResult__cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_std__vector_ScanResult__cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_std__vector_ScanResult__cxx::invoke_cxx)});
     }

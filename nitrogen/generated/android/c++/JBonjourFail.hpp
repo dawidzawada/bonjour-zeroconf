@@ -19,7 +19,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
    */
   struct JBonjourFail final: public jni::JavaClass<JBonjourFail> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/BonjourFail;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/BonjourFail;";
 
   public:
     /**

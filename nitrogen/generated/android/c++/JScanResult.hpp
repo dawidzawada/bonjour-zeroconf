@@ -22,7 +22,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
    */
   struct JScanResult final: public jni::JavaClass<JScanResult> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/ScanResult;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/ScanResult;";
 
   public:
     /**

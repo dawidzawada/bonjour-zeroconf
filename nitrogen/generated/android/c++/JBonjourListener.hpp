@@ -23,7 +23,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
    */
   struct JBonjourListener final: public jni::JavaClass<JBonjourListener> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/BonjourListener;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/BonjourListener;";
 
   public:
     /**

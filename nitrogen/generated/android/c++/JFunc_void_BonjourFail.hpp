@@ -25,7 +25,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
    */
   struct JFunc_void_BonjourFail: public jni::JavaClass<JFunc_void_BonjourFail> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_BonjourFail;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_BonjourFail;";
 
   public:
     /**
@@ -61,7 +61,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_BonjourFail_cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/dawidzawada/bonjourzeroconf/Func_void_BonjourFail_cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_BonjourFail_cxx::invoke_cxx)});
     }

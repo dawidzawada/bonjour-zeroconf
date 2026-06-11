@@ -9,6 +9,7 @@ package com.margelo.nitro.dawidzawada.bonjourzeroconf
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -34,6 +35,26 @@ data class ScanResult(
   val port: Double?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ScanResult) return false
+    return Objects.deepEquals(this.name, other.name)
+      && Objects.deepEquals(this.ipv4, other.ipv4)
+      && Objects.deepEquals(this.ipv6, other.ipv6)
+      && Objects.deepEquals(this.hostname, other.hostname)
+      && Objects.deepEquals(this.port, other.port)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf<Any?>(
+      name,
+      ipv4,
+      ipv6,
+      hostname,
+      port
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

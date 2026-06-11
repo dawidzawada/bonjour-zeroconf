@@ -62,7 +62,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf::bridge::swift {
     return optional.has_value();
   }
   inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
-    return *optional;
+    return optional.value();
   }
   
   // pragma MARK: std::optional<double>
@@ -77,7 +77,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf::bridge::swift {
     return optional.has_value();
   }
   inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return *optional;
+    return optional.value();
   }
   
   // pragma MARK: std::optional<ScanOptions>
@@ -92,7 +92,7 @@ namespace margelo::nitro::dawidzawada_bonjourzeroconf::bridge::swift {
     return optional.has_value();
   }
   inline ScanOptions get_std__optional_ScanOptions_(const std::optional<ScanOptions>& optional) noexcept {
-    return *optional;
+    return optional.value();
   }
   
   // pragma MARK: std::vector<ScanResult>

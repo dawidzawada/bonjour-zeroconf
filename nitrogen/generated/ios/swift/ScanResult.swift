@@ -89,6 +89,13 @@ public extension ScanResult {
   
   @inline(__always)
   var port: Double? {
-    return self.__port.value
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__port) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__port)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
   }
 }

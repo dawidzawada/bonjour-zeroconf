@@ -9,6 +9,7 @@ package com.margelo.nitro.dawidzawada.bonjourzeroconf
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -22,6 +23,18 @@ data class ScanOptions(
   val addressResolveTimeout: Double?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ScanOptions) return false
+    return Objects.deepEquals(this.addressResolveTimeout, other.addressResolveTimeout)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf<Any?>(
+      addressResolveTimeout
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

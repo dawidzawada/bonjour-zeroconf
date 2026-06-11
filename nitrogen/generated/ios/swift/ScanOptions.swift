@@ -30,6 +30,13 @@ public extension ScanOptions {
 
   @inline(__always)
   var addressResolveTimeout: Double? {
-    return self.__addressResolveTimeout.value
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__addressResolveTimeout) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__addressResolveTimeout)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
   }
 }
